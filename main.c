@@ -201,19 +201,96 @@ void coordenadasParaGanar(char jugador, char tableroOriginal[FILAS][COLUMNAS], i
     }
     *yDestino = *xDestino = -1;
 }
+/*
+Esta función cuenta y te dice el mayor puntaje, pero no te dice en cuál X ni cuál Y. Está pensada
+para ser llamada desde otra función que lleva cuenta de X e Y
+*/
+int contarSinSaberCoordenadas(char jugador, char copiaTablero[FILAS][COLUMNAS])
+{
+    int conteoMayor = 0;
+    int x, y;
+    for (y = 0; y < FILAS; y++)
+    {
+        for (x = 0; x < COLUMNAS; x++)
+        {
+            // Colocamos y contamos el puntaje
+            int conteoTemporal;
+            conteoTemporal = contarHaciaArriba(x, y, jugador, copiaTablero);
+            if (conteoTemporal > conteoMayor)
+            {
+                conteoMayor = conteoTemporal;
+            }
+            conteoTemporal = contarHaciaArribaDerecha(x, y, jugador, copiaTablero);
+            if (conteoTemporal > conteoMayor)
+            {
+                conteoMayor = conteoTemporal;
+            }
+
+            conteoTemporal = contarHaciaDerecha(x, y, jugador, copiaTablero);
+            if (conteoTemporal > conteoMayor)
+            {
+                conteoMayor = conteoTemporal;
+            }
+
+            conteoTemporal = contarHaciaAbajoDerecha(x, y, jugador, copiaTablero);
+            if (conteoTemporal > conteoMayor)
+            {
+                conteoMayor = conteoTemporal;
+            }
+        }
+    }
+    return conteoMayor;
+}
+/*
+Esta función complementa a contarSinSaberCoordenadas. Te dice en qué X e Y el jugador [jugador]
+obtendrá el mayor puntaje si pone ahí su pieza
+*/
+void coordenadasParaMayorPuntaje(char jugador, char tableroOriginal[FILAS][COLUMNAS], int *yDestino, int *xDestino, int *conteo)
+{
+
+    char copiaTablero[FILAS][COLUMNAS];
+    int y, x;
+    int conteoMayor = 0,
+        xConteoMayor = -1,
+        yConteoMayor = -1;
+    for (y = 0; y < FILAS; y++)
+    {
+        for (x = 0; x < COLUMNAS; x++)
+        {
+            clonarMatriz(tableroOriginal, copiaTablero);
+            if (!coordenadasVacias(y, x, copiaTablero))
+            {
+                continue;
+            }
+            // Colocamos y contamos el puntaje
+            colocarPieza(y, x, jugador, copiaTablero);
+            int conteoTemporal = contarSinSaberCoordenadas(jugador, copiaTablero);
+            if (conteoTemporal > conteoMayor)
+            {
+                conteoMayor = conteoTemporal;
+                yConteoMayor = y;
+                xConteoMayor = x;
+            }
+        }
+    }
+    *conteo = conteoMayor;
+    *xDestino = xConteoMayor;
+    *yDestino = yConteoMayor;
+}
+
 int main(int argc, char const *argv[])
 {
     char tablero[FILAS][COLUMNAS];
     limpiarTablero(tablero);
     imprimirTablero(tablero);
 
-    colocarPieza(0, 0, JUGADOR_X, tablero);
+    colocarPieza(2, 0, JUGADOR_X, tablero);
     colocarPieza(1, 1, JUGADOR_X, tablero);
     imprimirTablero(tablero);
     printf("Gana %c? %d\n", JUGADOR_O, comprobarSiGana(JUGADOR_O, tablero));
     printf("Gana %c? %d\n", JUGADOR_X, comprobarSiGana(JUGADOR_X, tablero));
-    int x, y;
-    coordenadasParaGanar(JUGADOR_X, tablero, &y, &x);
-    printf("Coordenadas ganadoras para %c son x en %d, y en %d", JUGADOR_X, x, y);
+    int x, y, conteo;
+    coordenadasParaMayorPuntaje(JUGADOR_X, tablero, &y, &x, &conteo);
+    printf("Coordenadas con mayor puntaje para %c son x en %d, y en %d con un conteo de %d", JUGADOR_X, x, y, conteo);
     return 0;
 }
