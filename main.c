@@ -41,6 +41,10 @@ void imprimirTablero(char tablero[FILAS][COLUMNAS])
         printf("|\n");
     }
 }
+int coordenadasVacias(int y, int x, char tablero[FILAS][COLUMNAS])
+{
+    return tablero[y][x] == ESPACIO_VACIO;
+}
 void colocarPieza(int y, int x, char pieza, char tablero[FILAS][COLUMNAS])
 {
     if (y < 0 || y >= FILAS)
@@ -57,6 +61,11 @@ void colocarPieza(int y, int x, char pieza, char tablero[FILAS][COLUMNAS])
     if (pieza != JUGADOR_O && pieza != JUGADOR_X)
     {
         printf("La pieza debe ser %c o %c", JUGADOR_O, JUGADOR_X);
+        return;
+    }
+    if (!coordenadasVacias(y, x, tablero))
+    {
+        printf("Coordenadas ya ocupadas");
         return;
     }
     tablero[y][x] = pieza;
@@ -167,7 +176,11 @@ int main(int argc, char const *argv[])
     colocarPieza(2, 0, JUGADOR_O, tablero);
     colocarPieza(2, 1, JUGADOR_O, tablero);
     colocarPieza(2, 2, JUGADOR_O, tablero);
+    colocarPieza(0, 0, JUGADOR_X, tablero);
+    colocarPieza(0, 1, JUGADOR_X, tablero);
+    colocarPieza(0, 2, JUGADOR_X, tablero);
     imprimirTablero(tablero);
-    printf("Gana? %d", comprobarSiGana(JUGADOR_O, tablero));
+    printf("Gana %c? %d\n", JUGADOR_O, comprobarSiGana(JUGADOR_O, tablero));
+    printf("Gana %c? %d\n", JUGADOR_X, comprobarSiGana(JUGADOR_X, tablero));
     return 0;
 }
