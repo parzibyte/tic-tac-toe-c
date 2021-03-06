@@ -1,10 +1,16 @@
 #include <stdio.h>
+#include <string.h>
 #define FILAS 3
 #define COLUMNAS 3
+#define TAMANIO_MATRIZ FILAS *COLUMNAS
 #define JUGADOR_X 'X'
 #define JUGADOR_O 'O'
 #define ESPACIO_VACIO ' '
 #define CONTEO_PARA_GANAR 3
+void clonarMatriz(char tableroOriginal[FILAS][COLUMNAS], char destino[FILAS][COLUMNAS])
+{
+    memcpy(destino, tableroOriginal, TAMANIO_MATRIZ);
+}
 
 void limpiarTablero(char tablero[FILAS][COLUMNAS])
 {
@@ -168,19 +174,46 @@ int comprobarSiGana(char jugador, char tablero[FILAS][COLUMNAS])
     // Terminamos de recorrer y no conectó
     return 0;
 }
+void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *y, int *x)
+{
+}
+
+void coordenadasParaGanar(char jugador, char tableroOriginal[FILAS][COLUMNAS], int *yDestino, int *xDestino)
+{
+    char copiaTablero[FILAS][COLUMNAS];
+    int y, x;
+    for (y = 0; y < FILAS; y++)
+    {
+        for (x = 0; x < COLUMNAS; x++)
+        {
+            clonarMatriz(tableroOriginal, copiaTablero);
+            if (coordenadasVacias(y, x, copiaTablero))
+            {
+                colocarPieza(y, x, jugador, copiaTablero);
+                if (comprobarSiGana(jugador, copiaTablero))
+                {
+                    *yDestino = y;
+                    *xDestino = x;
+                    return;
+                }
+            }
+        }
+    }
+    *yDestino = *xDestino = -1;
+}
 int main(int argc, char const *argv[])
 {
     char tablero[FILAS][COLUMNAS];
     limpiarTablero(tablero);
     imprimirTablero(tablero);
-    colocarPieza(2, 0, JUGADOR_O, tablero);
-    colocarPieza(2, 1, JUGADOR_O, tablero);
-    colocarPieza(2, 2, JUGADOR_O, tablero);
+
     colocarPieza(0, 0, JUGADOR_X, tablero);
-    colocarPieza(0, 1, JUGADOR_X, tablero);
-    colocarPieza(0, 2, JUGADOR_X, tablero);
+    colocarPieza(1, 1, JUGADOR_X, tablero);
     imprimirTablero(tablero);
     printf("Gana %c? %d\n", JUGADOR_O, comprobarSiGana(JUGADOR_O, tablero));
     printf("Gana %c? %d\n", JUGADOR_X, comprobarSiGana(JUGADOR_X, tablero));
+    int x, y;
+    coordenadasParaGanar(JUGADOR_X, tablero, &y, &x);
+    printf("Coordenadas ganadoras para %c son x en %d, y en %d", JUGADOR_X, x, y);
     return 0;
 }
