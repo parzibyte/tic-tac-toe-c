@@ -17,11 +17,15 @@
 #define JUGADOR_CPU 2
 #define CPU_CPU 3
 #define SALIR 4
+
+// Clona la matriz. Útil para las simulaciones que se hacen, así no se modifica el tablero original
 void clonarMatriz(char tableroOriginal[FILAS][COLUMNAS], char destino[FILAS][COLUMNAS])
 {
     memcpy(destino, tableroOriginal, TAMANIO_MATRIZ);
 }
 
+// Establece todo el tablero en espacios vacíos
+// Pd: quién te conoce memset
 void limpiarTablero(char tablero[FILAS][COLUMNAS])
 {
     int y;
@@ -35,6 +39,7 @@ void limpiarTablero(char tablero[FILAS][COLUMNAS])
     }
 }
 
+// Imprime el tablero de juego
 void imprimirTablero(char tablero[FILAS][COLUMNAS])
 {
     printf("\n");
@@ -57,10 +62,14 @@ void imprimirTablero(char tablero[FILAS][COLUMNAS])
         printf("|\n");
     }
 }
+
+// Indica si el tablero está vacío en las coordenadas indicadas
 int coordenadasVacias(int y, int x, char tablero[FILAS][COLUMNAS])
 {
     return tablero[y][x] == ESPACIO_VACIO;
 }
+
+// Coloca la X o O en las coordenadas especificadas
 void colocarPieza(int y, int x, char pieza, char tablero[FILAS][COLUMNAS])
 {
     if (y < 0 || y >= FILAS)
@@ -86,6 +95,11 @@ void colocarPieza(int y, int x, char pieza, char tablero[FILAS][COLUMNAS])
     }
     tablero[y][x] = pieza;
 }
+/*
+Funciones de conteo. Simplemente cuentan cuántas piezas del mismo jugador están
+alineadas
+*/
+
 int contarHaciaArriba(int x, int y, char jugador, char tablero[FILAS][COLUMNAS])
 {
     int yInicio = (y - CONTEO_PARA_GANAR >= 0) ? y - CONTEO_PARA_GANAR + 1 : 0;
@@ -163,6 +177,8 @@ int contarHaciaAbajoDerecha(int x, int y, char jugador, char tablero[FILAS][COLU
     }
     return contador;
 }
+
+// Indica si el jugador gana
 int comprobarSiGana(char jugador, char tablero[FILAS][COLUMNAS])
 {
     int y;
@@ -184,6 +200,8 @@ int comprobarSiGana(char jugador, char tablero[FILAS][COLUMNAS])
     // Terminamos de recorrer y no conectó
     return 0;
 }
+
+// Devuelve el jugador contrario al que se le pasa. Es decir, le das un O y te devuelve el X
 char oponenteDe(char jugador)
 {
     if (jugador == JUGADOR_O)
@@ -195,11 +213,15 @@ char oponenteDe(char jugador)
         return JUGADOR_O;
     }
 }
+
+// Imprime algo que el CPU "dice"
 void hablar(char *mensaje, char jugador)
 {
     printf("\nCPU (%c) dice: %s\n\n", jugador, mensaje);
 }
+
 // Debería llamarse después de verificar si alguien gana
+// Indica si hay un empate
 int empate(char tableroOriginal[FILAS][COLUMNAS])
 {
     int y;
@@ -217,10 +239,14 @@ int empate(char tableroOriginal[FILAS][COLUMNAS])
     }
     return 1;
 }
+
+// Devuelve un número aleatorio en un rango, incluyendo los límites
 int aleatorio_en_rango(int minimo, int maximo)
 {
     return minimo + rand() / (RAND_MAX / (maximo - minimo + 1) + 1);
 }
+
+// Coloca dos coordenadas aleatorias y válidas en xDestino y yDestino
 void obtenerCoordenadasAleatorias(char jugador, char tableroOriginal[FILAS][COLUMNAS], int *yDestino, int *xDestino)
 {
     int x, y;
@@ -233,6 +259,8 @@ void obtenerCoordenadasAleatorias(char jugador, char tableroOriginal[FILAS][COLU
     *xDestino = x;
 }
 
+// Coloca en yDestino y xDestino las coordenadas para que jugador gane en tableroOriginal.
+// Si no puede ganar, colocará ambas coordenadas en -1
 void coordenadasParaGanar(char jugador, char tableroOriginal[FILAS][COLUMNAS], int *yDestino, int *xDestino)
 {
     char copiaTablero[FILAS][COLUMNAS];
@@ -256,6 +284,7 @@ void coordenadasParaGanar(char jugador, char tableroOriginal[FILAS][COLUMNAS], i
     }
     *yDestino = *xDestino = -1;
 }
+
 /*
 Esta función cuenta y te dice el mayor puntaje, pero no te dice en cuál X ni cuál Y. Está pensada
 para ser llamada desde otra función que lleva cuenta de X e Y
@@ -296,6 +325,7 @@ int contarSinSaberCoordenadas(char jugador, char copiaTablero[FILAS][COLUMNAS])
     }
     return conteoMayor;
 }
+
 /*
 Esta función complementa a contarSinSaberCoordenadas. Te dice en qué X e Y el jugador [jugador]
 obtendrá el mayor puntaje si pone ahí su pieza
@@ -333,6 +363,7 @@ void coordenadasParaMayorPuntaje(char jugador, char tableroOriginal[FILAS][COLUM
     *yDestino = yConteoMayor;
 }
 
+// Hace que el CPU elija unas coordenadas para ganar
 void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDestino, int *xDestino)
 {
     hablar("Estoy pensando...", jugador);
@@ -394,6 +425,8 @@ void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDes
     hablar("Coordenadas aleatorias", jugador);
     obtenerCoordenadasAleatorias(jugador, tablero, yDestino, xDestino);
 }
+
+// Devuelve un jugador aleatorio
 char jugadorAleatorio()
 {
     if (aleatorio_en_rango(0, 1) == 0)
@@ -405,6 +438,8 @@ char jugadorAleatorio()
         return JUGADOR_X;
     }
 }
+
+// Loop principal del juego
 void iniciarJuego(int modo)
 {
     if (modo != JUGADOR_JUGADOR && modo != JUGADOR_CPU && modo != CPU_CPU)
@@ -413,12 +448,17 @@ void iniciarJuego(int modo)
         return;
     }
 
+    // Para que salgan cosas aleatorias
     srand(getpid());
+    // Iniciar tablero de juego
     char tablero[FILAS][COLUMNAS];
+    // Y limpiarlo
     limpiarTablero(tablero);
+    // Elegir jugador que inicia al azar
     char jugadorActual = jugadorAleatorio();
     printf("El jugador que inicia es: %c\n", jugadorActual);
     int x, y;
+    // Y allá vamos
     while (1)
     {
         imprimirTablero(tablero);
@@ -426,15 +466,20 @@ void iniciarJuego(int modo)
         {
             printf("Jugador %c. Ingresa coordenadas (x,y) para colocar la pieza separadas por una coma. Por ejemplo: 5,5\n", jugadorActual);
             scanf("%d,%d", &x, &y);
-            // Restamos 1 en ambos casos porque empezamos a contar desde 0 internamente
+            // Al usuario se le solicitan números comenzando a contar en 1, pero en los arreglos comenzamos desde el 0
+            // así que necesitamos restar uno en ambas variables
             x--;
             y--;
         }
         else if (modo == CPU_CPU || (modo == JUGADOR_CPU && jugadorActual == JUGADOR_CPU_O))
         {
+            // Si es modo CPU contra CPU o es el turno del CPU, dejamos que las coordenadas las elija
+            // el programa
             elegirCoordenadasCpu(jugadorActual, tablero, &y, &x);
         }
+        // Sin importar cuál modo haya sido, colocamos la pieza según las coordenadas elegidas
         colocarPieza(y, x, jugadorActual, tablero);
+        // Puede que después de colocar la pieza el jugador gane o haya un empate, así que comprobamos
         if (comprobarSiGana(jugadorActual, tablero))
         {
             imprimirTablero(tablero);
@@ -447,9 +492,11 @@ void iniciarJuego(int modo)
             printf("Empate");
             return;
         }
+        // Si no, es turno del otro jugador
         jugadorActual = oponenteDe(jugadorActual);
     }
 }
+
 int main(int argc, char const *argv[])
 {
     printf("================================================\n");
