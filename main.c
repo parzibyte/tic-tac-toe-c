@@ -8,8 +8,15 @@
 #define TAMANIO_MATRIZ FILAS *COLUMNAS
 #define JUGADOR_X 'X'
 #define JUGADOR_O 'O'
+#define JUGADOR_CPU_X JUGADOR_X
+#define JUGADOR_CPU_O JUGADOR_O
 #define ESPACIO_VACIO ' '
 #define CONTEO_PARA_GANAR 3
+// Modos de juego
+#define JUGADOR_JUGADOR 1
+#define JUGADOR_CPU 2
+#define CPU_CPU 3
+#define SALIR 4
 void clonarMatriz(char tableroOriginal[FILAS][COLUMNAS], char destino[FILAS][COLUMNAS])
 {
     memcpy(destino, tableroOriginal, TAMANIO_MATRIZ);
@@ -188,9 +195,9 @@ char oponenteDe(char jugador)
         return JUGADOR_O;
     }
 }
-void hablar(char *mensaje)
+void hablar(char *mensaje, char jugador)
 {
-    printf("\nCPU dice: %s\n\n", mensaje);
+    printf("\nCPU (%c) dice: %s\n\n", jugador, mensaje);
 }
 // Debería llamarse después de verificar si alguien gana
 int empate(char tableroOriginal[FILAS][COLUMNAS])
@@ -328,6 +335,7 @@ void coordenadasParaMayorPuntaje(char jugador, char tableroOriginal[FILAS][COLUM
 
 void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDestino, int *xDestino)
 {
+    hablar("Estoy pensando...", jugador);
     /*
     El orden en el que el CPU infiere las coordenadas que toma es:
     1. Ganar si se puede
@@ -343,7 +351,7 @@ void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDes
     coordenadasParaGanar(jugador, tablero, &y, &x);
     if (y != -1 && x != -1)
     {
-        hablar("Ganar");
+        hablar("Ganar", jugador);
         *yDestino = y;
         *xDestino = x;
         return;
@@ -352,7 +360,7 @@ void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDes
     coordenadasParaGanar(oponente, tablero, &y, &x);
     if (y != -1 && x != -1)
     {
-        hablar("Tomar victoria de oponente");
+        hablar("Tomar victoria de oponente", jugador);
         *yDestino = y;
         *xDestino = x;
         return;
@@ -362,14 +370,14 @@ void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDes
     coordenadasParaMayorPuntaje(oponente, tablero, &y, &x, &conteoOponente);
     if (conteoOponente > conteoJugador)
     {
-        hablar("Tomar puntaje mayor del oponente");
+        hablar("Tomar puntaje mayor del oponente", jugador);
         *yDestino = y;
         *xDestino = x;
         return;
     }
     else
     {
-        hablar("Tomar mi mayor puntaje");
+        hablar("Tomar mi mayor puntaje", jugador);
         *yDestino = y;
         *xDestino = x;
         return;
@@ -377,37 +385,86 @@ void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDes
     // 4
     if (coordenadasVacias(0, 0, tablero))
     {
-        hablar("Tomar columna superior izquierda");
+        hablar("Tomar columna superior izquierda", jugador);
         *yDestino = 0;
         *xDestino = 0;
         return;
     }
     // 5
-    hablar("Coordenadas aleatorias");
+    hablar("Coordenadas aleatorias", jugador);
     obtenerCoordenadasAleatorias(jugador, tablero, yDestino, xDestino);
 }
-void iniciarJuego()
+char jugadorAleatorio()
 {
+    if (aleatorio_en_rango(0, 1) == 0)
+    {
+        return JUGADOR_O;
+    }
+    else
+    {
+        return JUGADOR_X;
+    }
+}
+void iniciarJuego(int modo)
+{
+    if (modo != JUGADOR_JUGADOR && modo != JUGADOR_CPU && modo != CPU_CPU)
+    {
+        printf("Modo de juego no permitido");
+        return;
+    }
 
-    char tablero[FILAS][COLUMNAS];
     srand(getpid());
+    char tablero[FILAS][COLUMNAS];
     limpiarTablero(tablero);
-    imprimirTablero(tablero);
-    colocarPieza(0, 0, JUGADOR_X, tablero);
-    colocarPieza(0, 1, JUGADOR_O, tablero);
-    colocarPieza(0, 2, JUGADOR_O, tablero);
-    colocarPieza(1, 0, JUGADOR_X, tablero);
-    colocarPieza(1, 1, JUGADOR_X, tablero);
-    colocarPieza(1, 2, JUGADOR_O, tablero);
-    colocarPieza(2, 0, JUGADOR_O, tablero);
-    // colocarPieza(2, 1, JUGADOR_X, tablero);
-    imprimirTablero(tablero);
+    char jugadorActual = jugadorAleatorio();
+    printf("El jugador que inicia es: %c\n", jugadorActual);
     int x, y;
-    elegirCoordenadasCpu(JUGADOR_X, tablero, &y, &x);
-    printf("Soy %c. Lo mejor es que coloque mi pieza en X=%d,Y=%d", JUGADOR_X, x, y);
+    while (1)
+    {
+        imprimirTablero(tablero);
+        if (modo == JUGADOR_JUGADOR || (modo == JUGADOR_CPU && jugadorActual == JUGADOR_X))
+        {
+            printf("Jugador %c. Ingresa coordenadas (x,y) para colocar la pieza separadas por una coma. Por ejemplo: 5,5\n", jugadorActual);
+            scanf("%d,%d", &x, &y);
+            // Restamos 1 en ambos casos porque empezamos a contar desde 0 internamente
+            x--;
+            y--;
+        }
+        else if (modo == CPU_CPU || (modo == JUGADOR_CPU && jugadorActual == JUGADOR_CPU_O))
+        {
+            elegirCoordenadasCpu(jugadorActual, tablero, &y, &x);
+        }
+        colocarPieza(y, x, jugadorActual, tablero);
+        if (comprobarSiGana(jugadorActual, tablero))
+        {
+            imprimirTablero(tablero);
+            printf("El jugador %c gana\n", jugadorActual);
+            return;
+        }
+        else if (empate(tablero))
+        {
+            imprimirTablero(tablero);
+            printf("Empate");
+            return;
+        }
+        jugadorActual = oponenteDe(jugadorActual);
+    }
 }
 int main(int argc, char const *argv[])
 {
-    iniciarJuego();
+    printf("================================================\n");
+    printf("|   Tres en línea en ANSI C - By Parzibyte     |\n");
+    printf("|           https://parzibyte.me/blog          |\n");
+    printf("| (también conocido como tic tac toe o gatitos)|\n");
+    printf("================================================\n");
+    sleep(1);
+    int modo;
+    printf("1. Humano contra humano\n2. Humano contra CPU (El CPU juega como %c)\n3. CPU contra CPU\n4. Salir\nElige: ", JUGADOR_CPU_O);
+    scanf("%d", &modo);
+    if (modo == SALIR)
+    {
+        return 0;
+    }
+    iniciarJuego(modo);
     return 0;
 }
