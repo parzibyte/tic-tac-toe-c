@@ -177,17 +177,20 @@ int comprobarSiGana(char jugador, char tablero[FILAS][COLUMNAS])
     // Terminamos de recorrer y no conectó
     return 0;
 }
-void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *y, int *x)
+char oponenteDe(char jugador)
 {
-    /*
-    El orden en el que el CPU infiere las coordenadas que toma es:
-    1. Ganar si se puede
-    2. Hacer perder al oponente si está a punto de ganar
-    3. Tomar el mejor movimiento del oponente (en donde obtiene el mayor puntaje)
-    4. Tomar mi mejor movimiento (en donde obtengo mayor puntaje)
-    5. Elegir la de la esquina superior izquierda (0,0)
-    6. Columna aleatoria
-    */
+    if (jugador == JUGADOR_O)
+    {
+        return JUGADOR_X;
+    }
+    else
+    {
+        return JUGADOR_O;
+    }
+}
+void hablar(char *mensaje)
+{
+    printf("\nCPU dice: %s\n\n", mensaje);
 }
 // Debería llamarse después de verificar si alguien gana
 int empate(char tableroOriginal[FILAS][COLUMNAS])
@@ -323,22 +326,88 @@ void coordenadasParaMayorPuntaje(char jugador, char tableroOriginal[FILAS][COLUM
     *yDestino = yConteoMayor;
 }
 
-int main(int argc, char const *argv[])
+void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDestino, int *xDestino)
 {
+    /*
+    El orden en el que el CPU infiere las coordenadas que toma es:
+    1. Ganar si se puede
+    2. Hacer perder al oponente si está a punto de ganar
+    3. Tomar el mejor movimiento del oponente (en donde obtiene el mayor puntaje)
+    4. Tomar mi mejor movimiento (en donde obtengo mayor puntaje)
+    5. Elegir la de la esquina superior izquierda (0,0)
+    6. Columna aleatoria
+    */
+    int y, x, conteoJugador, conteoOponente;
+    char oponente = oponenteDe(jugador);
+    // 1
+    coordenadasParaGanar(jugador, tablero, &y, &x);
+    if (y != -1 && x != -1)
+    {
+        hablar("Ganar");
+        *yDestino = y;
+        *xDestino = x;
+        return;
+    }
+    // 2
+    coordenadasParaGanar(oponente, tablero, &y, &x);
+    if (y != -1 && x != -1)
+    {
+        hablar("Tomar victoria de oponente");
+        *yDestino = y;
+        *xDestino = x;
+        return;
+    }
+    // 3
+    coordenadasParaMayorPuntaje(jugador, tablero, &y, &x, &conteoJugador);
+    coordenadasParaMayorPuntaje(oponente, tablero, &y, &x, &conteoOponente);
+    if (conteoOponente > conteoJugador)
+    {
+        hablar("Tomar puntaje mayor del oponente");
+        *yDestino = y;
+        *xDestino = x;
+        return;
+    }
+    else
+    {
+        hablar("Tomar mi mayor puntaje");
+        *yDestino = y;
+        *xDestino = x;
+        return;
+    }
+    // 4
+    if (coordenadasVacias(0, 0, tablero))
+    {
+        hablar("Tomar columna superior izquierda");
+        *yDestino = 0;
+        *xDestino = 0;
+        return;
+    }
+    // 5
+    hablar("Coordenadas aleatorias");
+    obtenerCoordenadasAleatorias(jugador, tablero, yDestino, xDestino);
+}
+void iniciarJuego()
+{
+
     char tablero[FILAS][COLUMNAS];
     srand(getpid());
     limpiarTablero(tablero);
     imprimirTablero(tablero);
     colocarPieza(0, 0, JUGADOR_X, tablero);
-    colocarPieza(0, 1, JUGADOR_X, tablero);
-    colocarPieza(0, 2, JUGADOR_X, tablero);
-    colocarPieza(1, 0, JUGADOR_O, tablero);
-    colocarPieza(1, 1, JUGADOR_O, tablero);
+    colocarPieza(0, 1, JUGADOR_O, tablero);
+    colocarPieza(0, 2, JUGADOR_O, tablero);
+    colocarPieza(1, 0, JUGADOR_X, tablero);
+    colocarPieza(1, 1, JUGADOR_X, tablero);
     colocarPieza(1, 2, JUGADOR_O, tablero);
-    colocarPieza(2, 0, JUGADOR_X, tablero);
-    colocarPieza(2, 1, JUGADOR_X, tablero);
-    colocarPieza(2, 2, JUGADOR_X, tablero);
+    colocarPieza(2, 0, JUGADOR_O, tablero);
+    // colocarPieza(2, 1, JUGADOR_X, tablero);
     imprimirTablero(tablero);
-    printf("Es empate? %d", empate(tablero));
+    int x, y;
+    elegirCoordenadasCpu(JUGADOR_X, tablero, &y, &x);
+    printf("Soy %c. Lo mejor es que coloque mi pieza en X=%d,Y=%d", JUGADOR_X, x, y);
+}
+int main(int argc, char const *argv[])
+{
+    iniciarJuego();
     return 0;
 }
