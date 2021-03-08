@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #define FILAS 3
 #define COLUMNAS 3
 #define TAMANIO_MATRIZ FILAS *COLUMNAS
@@ -177,6 +180,21 @@ int comprobarSiGana(char jugador, char tablero[FILAS][COLUMNAS])
 void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *y, int *x)
 {
 }
+int aleatorio_en_rango(int minimo, int maximo)
+{
+    return minimo + rand() / (RAND_MAX / (maximo - minimo + 1) + 1);
+}
+void obtenerCoordenadasAleatorias(char jugador, char tableroOriginal[FILAS][COLUMNAS], int *yDestino, int *xDestino)
+{
+    int x, y;
+    do
+    {
+        x = aleatorio_en_rango(0, COLUMNAS - 1);
+        y = aleatorio_en_rango(0, FILAS - 1);
+    } while (!coordenadasVacias(y, x, tableroOriginal));
+    *yDestino = y;
+    *xDestino = x;
+}
 
 void coordenadasParaGanar(char jugador, char tableroOriginal[FILAS][COLUMNAS], int *yDestino, int *xDestino)
 {
@@ -281,6 +299,7 @@ void coordenadasParaMayorPuntaje(char jugador, char tableroOriginal[FILAS][COLUM
 int main(int argc, char const *argv[])
 {
     char tablero[FILAS][COLUMNAS];
+    srand(getpid());
     limpiarTablero(tablero);
     imprimirTablero(tablero);
 
@@ -291,6 +310,8 @@ int main(int argc, char const *argv[])
     printf("Gana %c? %d\n", JUGADOR_X, comprobarSiGana(JUGADOR_X, tablero));
     int x, y, conteo;
     coordenadasParaMayorPuntaje(JUGADOR_X, tablero, &y, &x, &conteo);
-    printf("Coordenadas con mayor puntaje para %c son x en %d, y en %d con un conteo de %d", JUGADOR_X, x, y, conteo);
+    printf("Coordenadas con mayor puntaje para %c son x en %d, y en %d con un conteo de %d\n", JUGADOR_X, x, y, conteo);
+    obtenerCoordenadasAleatorias(JUGADOR_O, tablero, &y, &x);
+    printf("Algunas coordenadas aleatorias para %c son X en %d, Y en %d\n", JUGADOR_O, x, y);
     return 0;
 }
