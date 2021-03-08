@@ -179,6 +179,33 @@ int comprobarSiGana(char jugador, char tablero[FILAS][COLUMNAS])
 }
 void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *y, int *x)
 {
+    /*
+    El orden en el que el CPU infiere las coordenadas que toma es:
+    1. Ganar si se puede
+    2. Hacer perder al oponente si está a punto de ganar
+    3. Tomar el mejor movimiento del oponente (en donde obtiene el mayor puntaje)
+    4. Tomar mi mejor movimiento (en donde obtengo mayor puntaje)
+    5. Elegir la de la esquina superior izquierda (0,0)
+    6. Columna aleatoria
+    */
+}
+// Debería llamarse después de verificar si alguien gana
+int empate(char tableroOriginal[FILAS][COLUMNAS])
+{
+    int y;
+    for (y = 0; y < FILAS; y++)
+    {
+        int x;
+        for (x = 0; x < COLUMNAS; x++)
+        {
+            // Si hay al menos un espacio vacío se dice que no hay empate
+            if (tableroOriginal[y][x] == ESPACIO_VACIO)
+            {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 int aleatorio_en_rango(int minimo, int maximo)
 {
@@ -302,16 +329,16 @@ int main(int argc, char const *argv[])
     srand(getpid());
     limpiarTablero(tablero);
     imprimirTablero(tablero);
-
+    colocarPieza(0, 0, JUGADOR_X, tablero);
+    colocarPieza(0, 1, JUGADOR_X, tablero);
+    colocarPieza(0, 2, JUGADOR_X, tablero);
+    colocarPieza(1, 0, JUGADOR_O, tablero);
+    colocarPieza(1, 1, JUGADOR_O, tablero);
+    colocarPieza(1, 2, JUGADOR_O, tablero);
     colocarPieza(2, 0, JUGADOR_X, tablero);
-    colocarPieza(1, 1, JUGADOR_X, tablero);
+    colocarPieza(2, 1, JUGADOR_X, tablero);
+    colocarPieza(2, 2, JUGADOR_X, tablero);
     imprimirTablero(tablero);
-    printf("Gana %c? %d\n", JUGADOR_O, comprobarSiGana(JUGADOR_O, tablero));
-    printf("Gana %c? %d\n", JUGADOR_X, comprobarSiGana(JUGADOR_X, tablero));
-    int x, y, conteo;
-    coordenadasParaMayorPuntaje(JUGADOR_X, tablero, &y, &x, &conteo);
-    printf("Coordenadas con mayor puntaje para %c son x en %d, y en %d con un conteo de %d\n", JUGADOR_X, x, y, conteo);
-    obtenerCoordenadasAleatorias(JUGADOR_O, tablero, &y, &x);
-    printf("Algunas coordenadas aleatorias para %c son X en %d, Y en %d\n", JUGADOR_O, x, y);
+    printf("Es empate? %d", empate(tablero));
     return 0;
 }
