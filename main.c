@@ -1,3 +1,31 @@
+/*
+
+  ____          _____               _ _           _       
+ |  _ \        |  __ \             (_) |         | |      
+ | |_) |_   _  | |__) |_ _ _ __ _____| |__  _   _| |_ ___ 
+ |  _ <| | | | |  ___/ _` | '__|_  / | '_ \| | | | __/ _ \
+ | |_) | |_| | | |  | (_| | |   / /| | |_) | |_| | ||  __/
+ |____/ \__, | |_|   \__,_|_|  /___|_|_.__/ \__, |\__\___|
+         __/ |                               __/ |        
+        |___/                               |___/         
+    
+____________________________________
+/ Si necesitas ayuda, contáctame en \
+\ https://parzibyte.me               /
+ ------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+Creado por Parzibyte (https://parzibyte.me).
+------------------------------------------------------------------------------------------------
+Si el código es útil para ti, puedes agradecerme siguiéndome: https://parzibyte.me/blog/sigueme/
+Y compartiendo mi blog con tus amigos
+También tengo canal de YouTube: https://www.youtube.com/channel/UCroP4BTWjfM0CkGB6AFUoBg?sub_confirmation=1
+O PayPal: https://paypal.me/LuisCabreraBenito
+------------------------------------------------------------------------------------------------
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -374,7 +402,7 @@ void elegirCoordenadasCpu(char jugador, char tablero[FILAS][COLUMNAS], int *yDes
     3. Tomar el mejor movimiento del oponente (en donde obtiene el mayor puntaje)
     4. Tomar mi mejor movimiento (en donde obtengo mayor puntaje)
     5. Elegir la de la esquina superior izquierda (0,0)
-    6. Columna aleatoria
+    6. Coordenadas aleatorias
     */
     int y, x, conteoJugador, conteoOponente;
     char oponente = oponenteDe(jugador);
